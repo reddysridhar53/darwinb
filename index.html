@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Tic Tac Toe</title>
+    <style media="screen">
+      html,body{
+        width: 100%;
+        background: #f1f1f1;
+        height: 100%;
+      }
+      #game{
+        width: 400px;
+        height:400px;
+        position:relative;
+        top:50%;
+        left:50%;
+        transform: translate(-50%, -50%);
+        box-sizing: border-box;
+        box-shadow: 0px 2px 6px 2px #999;
+        background: #fff;
+      }
+      .grid-item{
+        display: inline-block;
+        width: 33%;
+        outline: none;
+        height: 33.15%;
+        text-align: center;
+        /* box-shadow: 0px 2px 6px 2px #999; */
+        border-right: 1px solid #999;
+        border-bottom: 1px solid #999;
+        box-sizing: border-box;
+        padding: 10%;
+        font-size: 3em;
+      }
+      .popup{
+        position: absolute;
+        width: 400px;
+        height: 200px;
+        top:50%;
+        text-align: center;
+        padding: 5%;
+        box-sizing: border-box;
+        left:50%;
+        transform: translate(-50%, -50%);
+        background: #fff;
+        box-shadow: 0px 2px 6px 2px #ddd;
+      }
+      .hide{
+        display: none;
+      }
+      .popup div:first-child{
+        font-size: 20px;
+      }
+      .popup .restart{
+        display: inline-block;
+        padding: 0.5em 1em;
+        border-radius: 1em;
+        background: #009688;
+        color: #fff;
+        margin: 1em;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body onload="paintGrid()">
+    <div id="game">
+    </div>
+    <div class="popup hide">
+
+    </div>
+    <script type="text/javascript">
+      var counter = 0;
+      var playerObj = {
+        player1 : [],
+        player2 : []
+      };
+      var winningCells = [
+        [1,2,3],
+        [1,4,7],
+        [1,5,9],
+        [2,5,8],
+        [3,6,9],
+        [4,5,6],
+        [7,8,9],
+        [3,5,7]
+      ];
+      var gameOver = false;
+      function paintGrid(){
+        var grid = '';
+        var index = 1;
+        for(var i = 0; i < 3; i++){
+          for(var j = 0; j < 3; j++){
+            grid += '<div class="grid-item" data-cell='+(index++)+' data-row='+i+' data-column='+j+' contenteditable="true"></div>';
+          }
+        }
+        var gameCotainer = document.getElementById('game');
+        gameCotainer.innerHTML = '';
+        gameCotainer.innerHTML = grid;
+        var game = document.getElementById('game');
+        game.addEventListener('click', checkGridItem, false);
+      }
+
+      function checkGridItem(evt){
+        var editEnabled = evt.target.getAttribute('contenteditable');
+        if(evt.target.classList.contains('grid-item') && editEnabled !== 'false' && !gameOver){
+          counter++;
+          var enterValue = 'X';
+          if(counter % 2 === 0){
+            enterValue = '0';
+          }
+          evt.target.innerText = enterValue;
+          evt.target.setAttribute('contenteditable', false)
+          storePlayerCells(evt, enterValue);
+          if(counter > 4) checkWinner();
+        }
+      }
+      function storePlayerCells(evt, value){
+        var cell = parseInt(evt.target.dataset.cell, 10);
+        if(value === 'X'){
+          playerObj['player1'].push(cell);
+        }else{
+          playerObj['player2'].push(cell);
+        }
+        console.log(playerObj);
+      }
+      function checkWinner(){
+        var result;
+        for(var i = 0; i < winningCells.length; i++){
+          result = compareCells(winningCells[i])
+          if(result){
+            showGameOver(result);
+            break;
+          }else{
+            if(i === winningCells.length-1 && counter == 9){
+              showGameOver(false)
+            }
+          }
+        }
+      }
+
+      function showGameOver(result){
+        var popUp = document.getElementsByClassName('popup')[0];
+        popUp.classList.remove('hide');
+        gameOver = true;
+        if(!result){
+          popUp.innerHTML = '<div>Game Tie. Please Play again.</div><div><span class="restart">restart</span></div>';
+        }else{
+          popUp.innerHTML = '<div>Winner: '+result+'</div><div><span class="restart">restart</span></div>';
+        }
+        var restartBtn = document.getElementsByClassName('restart')[0];
+        restartBtn.addEventListener('click', restartGame, false);
+      }
+
+      function restartGame(){
+        var popUp = document.getElementsByClassName('popup')[0];
+        popUp.classList.add('hide');
+        counter = 0;
+        gameOver = false;
+        playerObj = {
+          player1 : [],
+          player2 : []
+        };
+        paintGrid();
+      }
+
+      function compareCells(data){
+        var playerOneCount = 0,
+            playerTwoCount = 0;
+        for(var j = 0; j < data.length; j++){
+          if(playerObj['player1'].indexOf(data[j]) > -1){
+            playerOneCount++;
+          }
+          if(playerObj['player2'].indexOf(data[j]) > -1){
+            playerTwoCount++;
+          }
+        }
+        if(playerOneCount === data.length){
+          return 'player1'
+        }else if(playerTwoCount === data.length){
+          return 'player2'
+        }else{
+          return false;
+        }
+      }
+    </script>
+  </body>
+</html>
